@@ -1,3 +1,6 @@
+import codecs
+import csv
+
 class Glacier:
     def __init__(self, glacier_id, name, unit, lat, lon, code):
         if (type(glacier_id) == str) & (type(name) == str) \
@@ -9,11 +12,15 @@ class Glacier:
             self.lat = lat
             self.lon = lon
             self.code = code
+            self.mass_balance_measurement = {}
         else:
             print("Please use the valid data type.")
 
     def add_mass_balance_measurement(self, year, mass_balance, partial):
-        raise NotImplementedError
+        self.mass_balance_measurement["Year"] = year
+        self.mass_balance_measurement["Mass balance"] = mass_balance
+        self.mass_balance_measurement["partial"] = partial
+
 
     def plot_mass_balance(self, output_path):
         raise NotImplementedError
@@ -23,6 +30,16 @@ class GlacierCollection:
 
     def __init__(self, file_path):
         self.csv_file_path = file_path
+        self.Raw_Glacier_Collections = []
+        self.Glacier_Collections = []
+        with codecs.open(self.csv_file_path, 'r', encoding='utf-8') as fp:
+            fp_key = csv.reader(fp)
+            for csv_key in fp_key:
+                csv_reader = csv.DictReader(fp, fieldnames=csv_key)
+                for row in csv_reader:
+                    self.Raw_Glacier_Collections.append(dict(row))
+
+
 
     def read_mass_balance_data(self, file_path):
         raise NotImplementedError
