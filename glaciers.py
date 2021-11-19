@@ -1,8 +1,18 @@
 class Glacier:
     def __init__(self, glacier_id, name, unit, lat, lon, code):
-        raise NotImplementedError
+        if (type(glacier_id) == str) & (type(name) == str) \
+                & (type(unit) == str) & (type(lat) == float) \
+                & (type(lon) == float) & (type(code) == int):
+            self.glacier_id = glacier_id
+            self.name = name
+            self.unit = unit
+            self.lat = lat
+            self.lon = lon
+            self.code = code
+        else:
+            print("Please use the valid data type.")
 
-    def add_mass_balance_measurement(self, year, mass_balance):
+    def add_mass_balance_measurement(self, year, mass_balance, partial):
         raise NotImplementedError
 
     def plot_mass_balance(self, output_path):
@@ -12,7 +22,7 @@ class Glacier:
 class GlacierCollection:
 
     def __init__(self, file_path):
-        raise NotImplementedError
+        self.csv_file_path = file_path
 
     def read_mass_balance_data(self, file_path):
         raise NotImplementedError
