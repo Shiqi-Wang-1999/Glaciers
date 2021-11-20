@@ -4,6 +4,7 @@ import re
 import utils
 import matplotlib.pyplot as plt
 
+
 class Glacier:
     def __init__(self, glacier_id, name, unit, lat, lon, code):
         if (type(glacier_id) == str) & (type(name) == str) \
@@ -26,17 +27,16 @@ class Glacier:
         if not self.mass_balance_measurement:
             print("There is no mass balance measurement of this glacier")
         else:
-            X = self.mass_balance_measurement.keys()
-            Y = [self.mass_balance_measurement[i][0] for i in X]
-
-            plt.bar(X, Y, 0.4)
+            x = self.mass_balance_measurement.keys()
+            y = [self.mass_balance_measurement[i][0] for i in x]
+            plt.figure(figsize=(8, 7))
+            plt.bar(x, y, 0.4)
             plt.xlabel("X-axis: Years")
             plt.ylabel("Y-axis: Mass balance measurements")
-            plt.title("bar chart")
+            plt.title("Mass measurements chart")
 
             plt.savefig(output_path)
             plt.show()
-
 
 
 class GlacierCollection:
@@ -102,9 +102,9 @@ class GlacierCollection:
                     glacier_names.append(i['NAME'])
         elif ques_mark_num == 1:
             index = int(code_pattern.find('?'))
-            iter = re.finditer("\d", code_pattern)
+            iter_ = re.finditer("\\d", code_pattern)
             lis = []
-            for i in iter:
+            for i in iter_:
                 lis.append(code_pattern[i.span()[0]])
             for i in self.Raw_Glacier_Collections:
                 if index == 0 & (i['FORM'] == lis[0]) & (i['FRONTAL_CHARS'] == lis[1]):
@@ -114,8 +114,8 @@ class GlacierCollection:
                 elif index == 2 & (i['PRIM_CLASSIFIC'] == lis[0]) & (i['FORM'] == lis[1]):
                     glacier_names.append(i['NAME'])
         elif ques_mark_num == 2:
-            index = int(re.search("\d",code_pattern).start())
-            value = re.search("\d", code_pattern).group()
+            index = int(re.search("\\d", code_pattern).start())
+            value = re.search("\\d", code_pattern).group()
             for i in self.Raw_Glacier_Collections:
                 if (index == 0) & (i['PRIM_CLASSIFIC'] == value):
                     glacier_names.append(i['NAME'])
@@ -138,7 +138,7 @@ class GlacierCollection:
                 latest = els[-1][1][0]
                 dic[glacier] = latest
         sorted_dic = sorted(dic.items(), key=lambda d: d[1], reverse=not reverse)
-        order = [i for i in sorted_dic]
+        order = [i[0] for i in sorted_dic]
         return order[0:n]
 
     def summary(self):
@@ -165,7 +165,25 @@ class GlacierCollection:
         print('\n'+display1, '\n'+display2, '\n'+display3)
 
     def plot_extremes(self, output_path):
-        raise NotImplementedError
+        dic = {}
+        for glacier in self.Glacier_Collections:
+            if glacier.mass_balance_measurement:
+                els = list(glacier.mass_balance_measurement.items())
+                latest = els[-1][1][0]
+                dic[glacier] = latest
+        sorted_dic = sorted(dic.items(), key=lambda d: d[1], reverse=False)
+        print(sorted_dic)
+        grow_glacier_name = sorted_dic[-1][0].name
+        grow_glacier_year = list(sorted_dic[-1][0].mass_balance_measurement.keys())[-1]
+        shrunk_glacier_name = sorted_dic[0][0].name
+        shrunk_glacier_year = list(sorted_dic[0][0].mass_balance_measurement.keys())[-1]
+        x = [grow_glacier_name+": "+grow_glacier_year, shrunk_glacier_name+": "+shrunk_glacier_year]
+        y = [sorted_dic[-1][1], sorted_dic[0][1]]
+        plt.figure(figsize=(8, 7))
+        plt.bar(x, y, 0.4)
+        plt.xlabel("X-axis: Glaciers and their extreme year")
+        plt.ylabel("Y-axis: Mass balance measurements")
+        plt.title("Extreme chart")
 
-
-
+        plt.savefig(output_path)
+        plt.show()
