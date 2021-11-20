@@ -2,6 +2,7 @@ import codecs
 import csv
 import re
 import utils
+import matplotlib.pyplot as plt
 
 class Glacier:
     def __init__(self, glacier_id, name, unit, lat, lon, code):
@@ -22,7 +23,20 @@ class Glacier:
         self.mass_balance_measurement[year] = [mass_balance, partial]
 
     def plot_mass_balance(self, output_path):
-        raise NotImplementedError
+        if not self.mass_balance_measurement:
+            print("There is no mass balance measurement of this glacier")
+        else:
+            X = self.mass_balance_measurement.keys()
+            Y = [self.mass_balance_measurement[i][0] for i in X]
+
+            plt.bar(X, Y, 0.4)
+            plt.xlabel("X-axis: Years")
+            plt.ylabel("Y-axis: Mass balance measurements")
+            plt.title("bar chart")
+
+            plt.savefig(output_path)
+            plt.show()
+
 
 
 class GlacierCollection:
@@ -61,7 +75,8 @@ class GlacierCollection:
                         else:
                             pass
         for i in self.Glacier_Collections:
-            print(i.name, " mass balance measurement:", i.mass_balance_measurement)
+            if i.mass_balance_measurement:
+                print(i.name, " has mass balance measurement:", i.mass_balance_measurement)
 
     def find_nearest(self, lat, lon, n=5):
         """Get the n glaciers closest to the given coordinates."""
@@ -151,3 +166,6 @@ class GlacierCollection:
 
     def plot_extremes(self, output_path):
         raise NotImplementedError
+
+
+
