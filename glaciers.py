@@ -1,6 +1,7 @@
 import codecs
 import csv
 import re
+import utils
 
 class Glacier:
     def __init__(self, glacier_id, name, unit, lat, lon, code):
@@ -60,10 +61,22 @@ class GlacierCollection:
                         else:
                             pass
             self.Glacier_Collections.append(glacier)
+        for i in self.Glacier_Collections:
+            print(i.mass_balance_measurement)
 
-    def find_nearest(self, lat, lon, n):
+    def find_nearest(self, lat, lon, n=5):
         """Get the n glaciers closest to the given coordinates."""
-        raise NotImplementedError
+        dic = {}
+        for i in self.Raw_Glacier_Collections:
+            lati = float(i['LATITUDE'])
+            loni = float(i['LONGITUDE'])
+            namei = i['NAME']
+            dic[namei] = utils.haversine_distance(lat, lon, lati, loni)
+        sorted_dic = sorted(dic.items(), key=lambda d: d[1], reverse=False)
+        order = [i[0] for i in sorted_dic]
+        return order[0:n]
+
+
 
     def filter_by_code(self, code_pattern):
         """Return the names of glaciers whose codes match the given pattern."""
