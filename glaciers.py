@@ -37,32 +37,31 @@ class GlacierCollection:
                 csv_reader = csv.DictReader(fp, fieldnames=csv_key)
                 for row in csv_reader:
                     self.Raw_Glacier_Collections.append(dict(row))
-
-    def read_mass_balance_data(self, file_path):
         for item in self.Raw_Glacier_Collections:
             three_digit = str(item['PRIM_CLASSIFIC'] + item['FORM'] + item['FRONTAL_CHARS'])
             glacier = Glacier(item['WGMS_ID'], item['NAME'], item['POLITICAL_UNIT'],
                               float(item['LATITUDE']), float(item['LONGITUDE']),
                               int(three_digit))
+            self.Glacier_Collections.append(glacier)
+
+    def read_mass_balance_data(self, file_path):
+        for glacier in self.Glacier_Collections:
             with open(file_path, "r", encoding="utf-8") as csvfile:
                 read = csv.reader(csvfile)
                 for i in read:
                     if i[1] == glacier.name:
-                        if i[11] == '':
-                            i[11] = '0'
-                        if (i[3] not in glacier.mass_balance_measurement.keys()) & (i[4] == '9999'):
+                        if (i[3] not in glacier.mass_balance_measurement.keys()) & (i[4] == '9999') & (i[11] != ''):
                             glacier.add_mass_balance_measurement(i[3], int(i[11]), False)
-                        elif (i[3] not in glacier.mass_balance_measurement.keys()) & (i[4] != '9999'):
+                        elif (i[3] not in glacier.mass_balance_measurement.keys()) & (i[4] != '9999') & (i[11] != ''):
                             glacier.add_mass_balance_measurement(i[3], int(i[11]), True)
-                        elif (i[3] in glacier.mass_balance_measurement.keys()) & (i[4] != '9999'):
+                        elif (i[3] in glacier.mass_balance_measurement.keys()) & (i[4] != '9999') & (i[11] != ''):
                             ini = int(glacier.mass_balance_measurement[i[3]][0])
                             new = ini + int(i[11])
                             glacier.mass_balance_measurement[i[3]][0] = new
                         else:
                             pass
-            self.Glacier_Collections.append(glacier)
         for i in self.Glacier_Collections:
-            print(i.mass_balance_measurement)
+            print(i.name, " mass balance measurement:", i.mass_balance_measurement)
 
     def find_nearest(self, lat, lon, n=5):
         """Get the n glaciers closest to the given coordinates."""
@@ -75,8 +74,6 @@ class GlacierCollection:
         sorted_dic = sorted(dic.items(), key=lambda d: d[1], reverse=False)
         order = [i[0] for i in sorted_dic]
         return order[0:n]
-
-
 
     def filter_by_code(self, code_pattern):
         """Return the names of glaciers whose codes match the given pattern."""
@@ -117,9 +114,18 @@ class GlacierCollection:
 
         return glacier_names
 
-    def sort_by_latest_mass_balance(self, n, reverse):
+    def sort_by_latest_mass_balance(self, n=5, reverse=False):
         """Return the N glaciers with the highest area accumulated in the last measurement."""
-        raise NotImplementedError
+        dic = {}
+        for glacier in self.Glacier_Collections:
+            if glacier.mass_balance_measurement.keys():
+                els = list(glacier.mass_balance_measurement.items())
+                latest = els[-1][1][0]
+                dic[glacier] = latest
+        sorted_dic = sorted(dic.items(), key=lambda d: d[1], reverse=not reverse)
+        order = [i for i in sorted_dic]
+        return order[0:n]
+
 
     def summary(self):
         raise NotImplementedError
