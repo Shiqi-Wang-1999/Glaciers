@@ -118,7 +118,7 @@ class GlacierCollection:
         """Return the N glaciers with the highest area accumulated in the last measurement."""
         dic = {}
         for glacier in self.Glacier_Collections:
-            if glacier.mass_balance_measurement.keys():
+            if glacier.mass_balance_measurement:
                 els = list(glacier.mass_balance_measurement.items())
                 latest = els[-1][1][0]
                 dic[glacier] = latest
@@ -126,9 +126,28 @@ class GlacierCollection:
         order = [i for i in sorted_dic]
         return order[0:n]
 
-
     def summary(self):
-        raise NotImplementedError
+        glaciers_num = str(len(self.Glacier_Collections))
+        measure_years = []
+        for glacier in self.Glacier_Collections:
+            if glacier.mass_balance_measurement:
+                els = list(glacier.mass_balance_measurement.items())
+                latest = els[0][0]
+                measure_years.append(int(latest))
+        earliest_year = str(min(measure_years))
+        has_mass_balance = 0
+        negative_change = 0
+        for glacier in self.Glacier_Collections:
+            if glacier.mass_balance_measurement:
+                has_mass_balance += 1
+                els = list(glacier.mass_balance_measurement.items())
+                if els[-1][1][0] < 0:
+                    negative_change += 1
+        shrunk_percentage = '{:.0%}'.format(negative_change/has_mass_balance)
+        display1 = "This collection has " + glaciers_num + " glaciers."
+        display2 = "The earliest measurement was in " + earliest_year + "."
+        display3 = shrunk_percentage + " of glaciers shrunk in their last measurement."
+        print('\n'+display1, '\n'+display2, '\n'+display3)
 
     def plot_extremes(self, output_path):
         raise NotImplementedError

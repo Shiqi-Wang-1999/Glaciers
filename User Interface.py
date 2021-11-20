@@ -10,6 +10,7 @@ collection = GlacierCollection(file_path)
 file_path1 = Path("C:/PycharmProjects/data/sheet-EE.csv")
 
 collection.read_mass_balance_data(file_path1)
-print(collection.sort_by_latest_mass_balance(6))
+collection.summary()
+#print(collection.sort_by_latest_mass_balance(6))
 # for glacier in collection.Glacier_Collections:
 #     print(glacier.mass_balance_measurement)
