@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 class Glacier:
     def __init__(self, glacier_id, name, unit, lat, lon, code):
-        # if len(glacier_id) != 5:
-        #     raise ValueError("The unique ID must be comprised of exactly 5 digits")
+        if len(glacier_id) != 5:
+            raise ValueError("The unique ID must be comprised of exactly 5 digits")
         if (lat < -90.) | (lat > 90.) | (lon < -180.) | (lon > 180.):
             raise ValueError("the latitude should be between -90 and 90, the longitude between -180 and 180")
         if (len(unit) != 2) | ((unit.isupper() == False) & (unit != "99")):
@@ -53,6 +53,7 @@ class GlacierCollection:
         self.csv_file_path = file_path
         self.Raw_Glacier_Collections = []
         self.Glacier_Collections = []
+        self.glacier_id_list = []
         with codecs.open(self.csv_file_path, 'r', encoding='utf-8') as fp:
             fp_key = csv.reader(fp)
             for csv_key in fp_key:
@@ -66,7 +67,18 @@ class GlacierCollection:
                               int(three_digit))
             self.Glacier_Collections.append(glacier)
 
+        for item in self.Glacier_Collections:
+            self.glacier_id_list.append(item.glacier_id)
+
     def read_mass_balance_data(self, file_path):
+        with open(file_path, "r", encoding="utf-8") as csvfile:
+            read = csv.reader(csvfile)
+            head = next(read)
+            for i in read:
+                if i[2] not in self.glacier_id_list:
+                    raise ValueError(f"The mass measurement data item with "
+                                     f"glacier ID {i[2]} is not defined in the glacier collection")
+
         for glacier in self.Glacier_Collections:
             with open(file_path, "r", encoding="utf-8") as csvfile:
                 read = csv.reader(csvfile)
