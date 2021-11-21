@@ -10,6 +10,14 @@ class Glacier:
         if (type(glacier_id) == str) & (type(name) == str) \
                 & (type(unit) == str) & (type(lat) == float) \
                 & (type(lon) == float) & (type(code) == int):
+            # if len(glacier_id) != 5:
+            #     raise ValueError("The unique ID must be comprised of exactly 5 digits")
+            if (lat < -90.) | (lat > 90.) | (lon < -180.) | (lon > 180.):
+                raise ValueError("the latitude should be between -90 and 90, the longitude between -180 and 180")
+            if (len(unit) != 2) | ((unit.isupper() == False) & (unit != "99")):
+                raise ValueError("The political unit must be a string of length 2, composed only of capital letters"
+                                 " or the special value ”99”")
+
             self.glacier_id = glacier_id
             self.name = name
             self.unit = unit
@@ -62,7 +70,10 @@ class GlacierCollection:
         for glacier in self.Glacier_Collections:
             with open(file_path, "r", encoding="utf-8") as csvfile:
                 read = csv.reader(csvfile)
+                head = next(read)
                 for i in read:
+                    if i[3] > "2021":
+                        raise ValueError("The year of measurement cannot be in the future")
                     if i[1] == glacier.name:
                         if (i[3] not in glacier.mass_balance_measurement.keys()) & (i[4] == '9999') & (i[11] != ''):
                             glacier.add_mass_balance_measurement(i[3], int(i[11]), False)
@@ -134,8 +145,8 @@ class GlacierCollection:
         dic = {}
         for glacier in self.Glacier_Collections:
             if glacier.mass_balance_measurement:
-                els = list(glacier.mass_balance_measurement.items())
-                latest = els[-1][1][0]
+                measurement_list = list(glacier.mass_balance_measurement.items())
+                latest = measurement_list[-1][1][0]
                 dic[glacier] = latest
         sorted_dic = sorted(dic.items(), key=lambda d: d[1], reverse=not reverse)
         order = [i[0] for i in sorted_dic]
@@ -146,8 +157,8 @@ class GlacierCollection:
         measure_years = []
         for glacier in self.Glacier_Collections:
             if glacier.mass_balance_measurement:
-                els = list(glacier.mass_balance_measurement.items())
-                latest = els[0][0]
+                measurement_list = list(glacier.mass_balance_measurement.items())
+                latest = measurement_list[0][0]
                 measure_years.append(int(latest))
         earliest_year = str(min(measure_years))
         has_mass_balance = 0
@@ -155,8 +166,8 @@ class GlacierCollection:
         for glacier in self.Glacier_Collections:
             if glacier.mass_balance_measurement:
                 has_mass_balance += 1
-                els = list(glacier.mass_balance_measurement.items())
-                if els[-1][1][0] < 0:
+                measurement_list = list(glacier.mass_balance_measurement.items())
+                if measurement_list[-1][1][0] < 0:
                     negative_change += 1
         shrunk_percentage = '{:.0%}'.format(negative_change/has_mass_balance)
         display1 = "This collection has " + glaciers_num + " glaciers."
@@ -168,8 +179,8 @@ class GlacierCollection:
         dic = {}
         for glacier in self.Glacier_Collections:
             if glacier.mass_balance_measurement:
-                els = list(glacier.mass_balance_measurement.items())
-                latest = els[-1][1][0]
+                measurement_list = list(glacier.mass_balance_measurement.items())
+                latest = measurement_list[-1][1][0]
                 dic[glacier] = latest
         sorted_dic = sorted(dic.items(), key=lambda d: d[1], reverse=False)
         print(sorted_dic)

@@ -3,6 +3,7 @@ from glaciers import Glacier, GlacierCollection
 
 file_path = Path("C:/PycharmProjects/data/sheet-A.csv")
 collection = GlacierCollection(file_path)
+
 # print(collection.Raw_Glacier_Collections)
 #print(collection.filter_by_code("6?9"))
 
