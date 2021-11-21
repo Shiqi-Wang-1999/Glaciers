@@ -7,28 +7,28 @@ import matplotlib.pyplot as plt
 
 class Glacier:
     def __init__(self, glacier_id, name, unit, lat, lon, code):
-        if (type(glacier_id) == str) & (type(name) == str) \
-                & (type(unit) == str) & (type(lat) == float) \
-                & (type(lon) == float) & (type(code) == int):
-            # if len(glacier_id) != 5:
-            #     raise ValueError("The unique ID must be comprised of exactly 5 digits")
-            if (lat < -90.) | (lat > 90.) | (lon < -180.) | (lon > 180.):
-                raise ValueError("the latitude should be between -90 and 90, the longitude between -180 and 180")
-            if (len(unit) != 2) | ((unit.isupper() == False) & (unit != "99")):
-                raise ValueError("The political unit must be a string of length 2, composed only of capital letters"
-                                 " or the special value ”99”")
+        # if len(glacier_id) != 5:
+        #     raise ValueError("The unique ID must be comprised of exactly 5 digits")
+        if (lat < -90.) | (lat > 90.) | (lon < -180.) | (lon > 180.):
+            raise ValueError("the latitude should be between -90 and 90, the longitude between -180 and 180")
+        if (len(unit) != 2) | ((unit.isupper() == False) & (unit != "99")):
+            raise ValueError("The political unit must be a string of length 2, composed only of capital letters"
+                             " or the special value ”99”")
 
-            self.glacier_id = glacier_id
-            self.name = name
-            self.unit = unit
-            self.lat = lat
-            self.lon = lon
-            self.code = code
-            self.mass_balance_measurement = {}
-        else:
-            print("Please use the valid data type.")
+        self.glacier_id = glacier_id
+        self.name = name
+        self.unit = unit
+        self.lat = lat
+        self.lon = lon
+        self.code = code
+        self.mass_balance_measurement = {}
 
     def add_mass_balance_measurement(self, year, mass_balance, partial):
+        if year > "2021":
+            raise ValueError("The year of measurement cannot be in the future")
+        if type(mass_balance) != int:
+            raise TypeError("The data type of mass measurement should be integer")
+
         self.mass_balance_measurement[year] = [mass_balance, partial]
 
     def plot_mass_balance(self, output_path):
@@ -72,8 +72,6 @@ class GlacierCollection:
                 read = csv.reader(csvfile)
                 head = next(read)
                 for i in read:
-                    if i[3] > "2021":
-                        raise ValueError("The year of measurement cannot be in the future")
                     if i[1] == glacier.name:
                         if (i[3] not in glacier.mass_balance_measurement.keys()) & (i[4] == '9999') & (i[11] != ''):
                             glacier.add_mass_balance_measurement(i[3], int(i[11]), False)
@@ -91,20 +89,37 @@ class GlacierCollection:
 
     def find_nearest(self, lat, lon, n=5):
         """Get the n glaciers closest to the given coordinates."""
+
+        float_lat = float(lat)
+        float_lon = float(lon)
+
+        if (float_lat < -90.) | (float_lat > 90.) | (float_lon < -180.) | (float_lon > 180.):
+            raise ValueError("the latitude should be between -90 and 90, the longitude between -180 and 180")
         dic = {}
         for i in self.Raw_Glacier_Collections:
             lati = float(i['LATITUDE'])
             loni = float(i['LONGITUDE'])
+            if (lati < -90.) | (lati > 90.) | (loni < -180.) | (loni > 180.):
+                raise ValueError("the latitude should be between -90 and 90, the longitude between -180 and 180")
+
             namei = i['NAME']
-            dic[namei] = utils.haversine_distance(lat, lon, lati, loni)
+            dic[namei] = utils.haversine_distance(float_lat, float_lon, lati, loni)
         sorted_dic = sorted(dic.items(), key=lambda d: d[1], reverse=False)
         order = [i[0] for i in sorted_dic]
         return order[0:n]
 
     def filter_by_code(self, code_pattern):
         """Return the names of glaciers whose codes match the given pattern."""
-        glacier_names = []
+        if (type(code_pattern) != int) & (type(code_pattern) != str):
+            raise TypeError("Please use a valid code type like string or integer")
         code_ = str(code_pattern)
+        if len(code_) != 3:
+            raise ValueError("Please use the code with exact 3 digits")
+        for i in code_:
+            if (not i.isdigit()) & (i != "?"):
+                raise ValueError("Please input the code only with digit or '?'")
+
+        glacier_names = []
         ques_mark_num = code_pattern.count('?')
         if ques_mark_num == 0:
             for i in self.Raw_Glacier_Collections:
@@ -169,11 +184,11 @@ class GlacierCollection:
                 measurement_list = list(glacier.mass_balance_measurement.items())
                 if measurement_list[-1][1][0] < 0:
                     negative_change += 1
-        shrunk_percentage = '{:.0%}'.format(negative_change/has_mass_balance)
+        shrunk_percentage = '{:.0%}'.format(negative_change / has_mass_balance)
         display1 = "This collection has " + glaciers_num + " glaciers."
         display2 = "The earliest measurement was in " + earliest_year + "."
         display3 = shrunk_percentage + " of glaciers shrunk in their last measurement."
-        print('\n'+display1, '\n'+display2, '\n'+display3)
+        print('\n' + display1, '\n' + display2, '\n' + display3)
 
     def plot_extremes(self, output_path):
         dic = {}
@@ -188,7 +203,7 @@ class GlacierCollection:
         grow_glacier_year = list(sorted_dic[-1][0].mass_balance_measurement.keys())[-1]
         shrunk_glacier_name = sorted_dic[0][0].name
         shrunk_glacier_year = list(sorted_dic[0][0].mass_balance_measurement.keys())[-1]
-        x = [grow_glacier_name+": "+grow_glacier_year, shrunk_glacier_name+": "+shrunk_glacier_year]
+        x = [grow_glacier_name + ": " + grow_glacier_year, shrunk_glacier_name + ": " + shrunk_glacier_year]
         y = [sorted_dic[-1][1], sorted_dic[0][1]]
         plt.figure(figsize=(8, 7))
         plt.bar(x, y, 0.4)
