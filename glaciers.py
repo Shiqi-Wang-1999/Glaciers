@@ -23,19 +23,20 @@ class Glacier:
         self.mass_balance_measurement = {}
 
     def add_mass_balance_measurement(self, year, mass_balance, partial):
-        if year > "2021":
+        str_year = str(year)
+        if str_year > "2021":
             raise ValueError("The year of measurement cannot be in the future")
-        if (year not in self.mass_balance_measurement.keys()) & (not partial) & (mass_balance != ''):
+        if (str_year not in self.mass_balance_measurement.keys()) & (not partial) & (mass_balance != ''):
             int_mass_balance = int(mass_balance)
-            self.mass_balance_measurement[year] = [int_mass_balance, partial]
-        elif (year not in self.mass_balance_measurement.keys()) & partial & (mass_balance != ''):
+            self.mass_balance_measurement[str_year] = [int_mass_balance, partial]
+        elif (str_year not in self.mass_balance_measurement.keys()) & partial & (mass_balance != ''):
             int_mass_balance = int(mass_balance)
-            self.mass_balance_measurement[year] = [int_mass_balance, partial]
-        elif (year in self.mass_balance_measurement.keys()) & partial & (mass_balance != ''):
+            self.mass_balance_measurement[str_year] = [int_mass_balance, partial]
+        elif (str_year in self.mass_balance_measurement.keys()) & partial & (mass_balance != ''):
             int_mass_balance = int(mass_balance)
-            ini = int(self.mass_balance_measurement[year][0])
+            ini = int(self.mass_balance_measurement[str_year][0])
             new = ini + int_mass_balance
-            self.mass_balance_measurement[year][0] = new
+            self.mass_balance_measurement[str_year][0] = new
         else:
             pass
 
@@ -127,14 +128,14 @@ class GlacierCollection:
                 raise ValueError("Please input the code only with digit or '?'")
 
         glacier_names = []
-        ques_mark_num = code_pattern.count('?')
+        ques_mark_num = code_.count('?')
         if ques_mark_num == 0:
             for i in self.Raw_Glacier_Collections:
                 three_digit = i['PRIM_CLASSIFIC'] + i['FORM'] + i['FRONTAL_CHARS']
                 if three_digit == code_:
                     glacier_names.append(i['NAME'])
         elif ques_mark_num == 1:
-            index = int(code_pattern.find('?'))
+            index = int(code_.find('?'))
             for i in self.Raw_Glacier_Collections:
                 if (index == 0) & (i['FORM'] == code_[1]) & (i['FRONTAL_CHARS'] == code_[2]):
                     glacier_names.append(i['NAME'])
@@ -143,8 +144,8 @@ class GlacierCollection:
                 elif (index == 2) & (i['PRIM_CLASSIFIC'] == code_[0]) & (i['FORM'] == code_[1]):
                     glacier_names.append(i['NAME'])
         elif ques_mark_num == 2:
-            index = int(re.search("\\d", code_pattern).start())
-            value = re.search("\\d", code_pattern).group()
+            index = int(re.search("\\d", code_).start())
+            value = re.search("\\d", code_).group()
             for i in self.Raw_Glacier_Collections:
                 if (index == 0) & (i['PRIM_CLASSIFIC'] == value):
                     glacier_names.append(i['NAME'])
