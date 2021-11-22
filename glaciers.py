@@ -27,7 +27,7 @@ class Glacier:
             raise ValueError("The year of measurement cannot be in the future")
         if (year not in self.mass_balance_measurement.keys()) & (not partial) & (mass_balance != ''):
             int_mass_balance = int(mass_balance)
-            self.mass_balance_measurement[year] = [int_mass_balance, not partial]
+            self.mass_balance_measurement[year] = [int_mass_balance, partial]
         elif (year not in self.mass_balance_measurement.keys()) & partial & (mass_balance != ''):
             int_mass_balance = int(mass_balance)
             self.mass_balance_measurement[year] = [int_mass_balance, partial]
@@ -135,16 +135,12 @@ class GlacierCollection:
                     glacier_names.append(i['NAME'])
         elif ques_mark_num == 1:
             index = int(code_pattern.find('?'))
-            iter_ = re.finditer("\\d", code_pattern)
-            lis = []
-            for i in iter_:
-                lis.append(code_pattern[i.span()[0]])
             for i in self.Raw_Glacier_Collections:
-                if index == 0 & (i['FORM'] == lis[0]) & (i['FRONTAL_CHARS'] == lis[1]):
+                if (index == 0) & (i['FORM'] == code_[1]) & (i['FRONTAL_CHARS'] == code_[2]):
                     glacier_names.append(i['NAME'])
-                elif index == 1 & (i['PRIM_CLASSIFIC'] == lis[0]) & (i['FRONTAL_CHARS'] == lis[1]):
+                elif (index == 1) & (i['PRIM_CLASSIFIC'] == code_[0]) & (i['FRONTAL_CHARS'] == code_[2]):
                     glacier_names.append(i['NAME'])
-                elif index == 2 & (i['PRIM_CLASSIFIC'] == lis[0]) & (i['FORM'] == lis[1]):
+                elif (index == 2) & (i['PRIM_CLASSIFIC'] == code_[0]) & (i['FORM'] == code_[1]):
                     glacier_names.append(i['NAME'])
         elif ques_mark_num == 2:
             index = int(re.search("\\d", code_pattern).start())
