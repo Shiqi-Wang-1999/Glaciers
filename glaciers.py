@@ -12,8 +12,7 @@ class Glacier:
         if (lat < -90.) | (lat > 90.) | (lon < -180.) | (lon > 180.):
             raise ValueError("the latitude should be between -90 and 90, the longitude between -180 and 180")
         if (len(unit) != 2) | ((unit.isupper() == False) & (unit != "99")):
-            raise ValueError("The political unit must be a string of length 2, composed only of capital letters"
-                             " or the special value ”99”")
+            raise ValueError("The political unit must be a string of length 2, composed only of capital letters or the special value ”99”")
 
         self.glacier_id = glacier_id
         self.name = name
@@ -26,10 +25,19 @@ class Glacier:
     def add_mass_balance_measurement(self, year, mass_balance, partial):
         if year > "2021":
             raise ValueError("The year of measurement cannot be in the future")
-        if type(mass_balance) != int:
-            raise TypeError("The data type of mass measurement should be integer")
-
-        self.mass_balance_measurement[year] = [mass_balance, partial]
+        if (year not in self.mass_balance_measurement.keys()) & (not partial) & (mass_balance != ''):
+            int_mass_balance = int(mass_balance)
+            self.mass_balance_measurement[year] = [int_mass_balance, not partial]
+        elif (year not in self.mass_balance_measurement.keys()) & partial & (mass_balance != ''):
+            int_mass_balance = int(mass_balance)
+            self.mass_balance_measurement[year] = [int_mass_balance, partial]
+        elif (year in self.mass_balance_measurement.keys()) & partial & (mass_balance != ''):
+            int_mass_balance = int(mass_balance)
+            ini = int(self.mass_balance_measurement[year][0])
+            new = ini + int_mass_balance
+            self.mass_balance_measurement[year][0] = new
+        else:
+            pass
 
     def plot_mass_balance(self, output_path):
         if not self.mass_balance_measurement:
@@ -78,26 +86,13 @@ class GlacierCollection:
                 if i[2] not in self.glacier_id_list:
                     raise ValueError(f"The mass measurement data item with "
                                      f"glacier ID {i[2]} is not defined in the glacier collection")
-
         for glacier in self.Glacier_Collections:
             with open(file_path, "r", encoding="utf-8") as csvfile:
                 read = csv.reader(csvfile)
                 head = next(read)
                 for i in read:
                     if i[1] == glacier.name:
-                        if (i[3] not in glacier.mass_balance_measurement.keys()) & (i[4] == '9999') & (i[11] != ''):
-                            glacier.add_mass_balance_measurement(i[3], int(i[11]), False)
-                        elif (i[3] not in glacier.mass_balance_measurement.keys()) & (i[4] != '9999') & (i[11] != ''):
-                            glacier.add_mass_balance_measurement(i[3], int(i[11]), True)
-                        elif (i[3] in glacier.mass_balance_measurement.keys()) & (i[4] != '9999') & (i[11] != ''):
-                            ini = int(glacier.mass_balance_measurement[i[3]][0])
-                            new = ini + int(i[11])
-                            glacier.mass_balance_measurement[i[3]][0] = new
-                        else:
-                            pass
-        for i in self.Glacier_Collections:
-            if i.mass_balance_measurement:
-                print(i.name, " has mass balance measurement:", i.mass_balance_measurement)
+                        glacier.add_mass_balance_measurement(i[3], i[11], i[4] != '9999')
 
     def find_nearest(self, lat, lon, n=5):
         """Get the n glaciers closest to the given coordinates."""

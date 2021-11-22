@@ -1,9 +1,11 @@
 from pathlib import Path
 from glaciers import Glacier, GlacierCollection
+import pytest
 
 file_path = Path("C:/PycharmProjects/data/sheet-A.csv")
 collection = GlacierCollection(file_path)
-
+# glacier = Glacier('01678', 'mountain', 'CH', 46.37, 7.37, 600)
+# glacier.add_mass_balance_measurement("2023", 200, True)
 #print(collection.find_nearest("-80","120",5))
 # print(collection.Raw_Glacier_Collections)
 #print(collection.filter_by_code("???"))
@@ -12,6 +14,9 @@ collection = GlacierCollection(file_path)
 file_path1 = Path("C:/PycharmProjects/data/sheet-EE.csv")
 
 collection.read_mass_balance_data(file_path1)
+for gla in collection.Glacier_Collections:
+    if gla.mass_balance_measurement:
+        print(f"{gla.glacier_id}'s measurement: ", gla.mass_balance_measurement)
 # plot_path = Path("C:/PycharmProjects/output/figure 2")
 # collection.plot_extremes(plot_path)
 #collection.summary()
@@ -26,3 +31,5 @@ collection.read_mass_balance_data(file_path1)
 # glacier.mass_balance_measurement = dic
 #
 # glacier.plot_mass_balance(plot_path)
+
+#pytest.main()
