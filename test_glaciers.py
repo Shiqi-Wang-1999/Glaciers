@@ -31,7 +31,7 @@ def test_glacier_unit():
 
 def test_filter_pattern():
     with pytest.raises(ValueError) as exception:
-        file_path = Path("C:/PycharmProjects/data/sheet-A.csv")
+        file_path = Path("test_used_data/glacier_collect.csv")
         collection = GlacierCollection(file_path)
         print(collection.filter_by_code("????"))
     assert "Please use the code with exact 3 digits" in str(exception.value)
