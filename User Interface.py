@@ -4,7 +4,7 @@ from glaciers import Glacier, GlacierCollection
 
 # file_path = Path("C:/PycharmProjects/data/sheet-A.csv")
 # collection = GlacierCollection(file_path)
-# glacier = Glacier('01678', 'mountain', 'CH', 46.37, 7.37, 600)
+glacier = Glacier('01678', 'mountain', 'CH', 46.37, 7.37, 600)
 # glacier.add_mass_balance_measurement("2023", 200, True)
 #print(collection.find_nearest("-80","120",5))
 # print(collection.Raw_Glacier_Collections)

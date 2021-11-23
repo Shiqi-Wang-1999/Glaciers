@@ -3,7 +3,7 @@ from glaciers import Glacier, GlacierCollection
 from pathlib import Path
 
 
-# Errors with appropriate error messages are thrown when invalid values are encountered
+
 def test_glacier_id():
     with pytest.raises(ValueError) as exception:
         glacier = Glacier('1678', 'mountain', 'CH', 46.37, 7.37, 600)

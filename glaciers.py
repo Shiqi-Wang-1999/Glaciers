@@ -57,7 +57,6 @@ class Glacier:
 
 
 class GlacierCollection:
-
     def __init__(self, file_path):
         self.csv_file_path = file_path
         self.Raw_Glacier_Collections = []
